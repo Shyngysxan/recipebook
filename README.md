@@ -89,3 +89,15 @@ erDiagram
        python manage.py runserver
 
 6. Админ панель: http://127.0.0.1:8000/admin/
+## API (№6 жұмыс)
+
+| Әдіс | URL | Сипаттама | Статус |
+|---|---|---|---|
+| GET | /api/recipes/ | Рецепттер тізімі | 200 |
+| POST | /api/recipes/ | Рецепт жасау | 201, 400 |
+| GET | /api/recipes/<id>/ | Бір рецепт | 200, 404 |
+| PUT | /api/recipes/<id>/ | Рецептті жаңарту | 200, 400, 404 |
+| DELETE | /api/recipes/<id>/ | Рецептті өшіру | 200, 404 |
+
+Міндетті өрістер: title, instructions, cooking_time, author_id (тек POST-та).
+Қате формат: {"status": "error", "message": "...", "errors": {...}}
