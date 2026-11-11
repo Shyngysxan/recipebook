@@ -1,0 +1,232 @@
+{% extends "recipes/base.html" %}
+
+{% block style %}
+  .hero {
+    background: linear-gradient(135deg, #ff9a5a, #d9480f);
+    color: #fff;
+    padding: 48px 20px 56px;
+    text-align: center;
+  }
+  .hero h1 { margin: 0 0 8px; font-size: 2.2rem; }
+  .hero p { margin: 0 auto 22px; max-width: 520px; opacity: .95; }
+  .search {
+    display: block;
+    width: 100%;
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 14px 20px;
+    font: inherit;
+    font-size: 1.05rem;
+    border: 0;
+    border-radius: 999px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, .18);
+  }
+  .search:focus { outline: 3px solid rgba(255, 255, 255, .6); }
+  .filters { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 28px 0 8px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; flex: 1; }
+  .chip {
+    font: inherit;
+    font-weight: 600;
+    padding: 7px 16px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--card);
+    color: var(--text);
+    cursor: pointer;
+  }
+  .chip:hover { border-color: var(--primary); }
+  .chip.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+  select {
+    font: inherit;
+    padding: 7px 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--card);
+    color: var(--text);
+  }
+  .count { color: var(--muted); font-size: .9rem; margin: 6px 0 16px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
+  .recipe-card {
+    display: flex;
+    flex-direction: column;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: transform .15s, box-shadow .15s;
+  }
+  .recipe-card:hover { transform: translateY(-3px); box-shadow: 0 8px 22px rgba(80, 40, 10, .15); }
+  .recipe-card .tile { height: 130px; }
+  .card-body { display: flex; flex-direction: column; gap: 6px; padding: 14px 16px 16px; flex: 1; }
+  .card-title { margin: 0; font-size: 1.1rem; }
+  .card-desc {
+    margin: 0;
+    flex: 1;
+    color: var(--muted);
+    font-size: .9rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .card-meta { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: .82rem; color: var(--muted); }
+  .card-meta .rating { color: var(--primary-dark); font-weight: 700; }
+{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <h1>Дәмді рецепттер каталогы</h1>
+  <p>Қазақ және әлем асханасының рецептері: ингредиенттері мен дайындау жолы дайын тұр.</p>
+  <input id="search" class="search" type="search" placeholder="Рецепт іздеу: плов, сорпа, десерт...">
+</section>
+
+<main class="container">
+  <div class="filters">
+    <div id="chips" class="chips"></div>
+    <select id="cuisine" aria-label="Ұлттық асхана"></select>
+    <select id="sort" aria-label="Сұрыптау">
+      <option value="new">Жаңалары алдымен</option>
+      <option value="rating">Рейтинг бойынша</option>
+      <option value="time">Тез дайындалатындар</option>
+    </select>
+  </div>
+  <div id="count" class="count"></div>
+  <div id="grid" class="grid"></div>
+  <div id="state" class="state-box">Жүктелуде...</div>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const state = { recipes: [], category: "all", cuisine: "all", search: "", sort: "new" };
+  const searchEl = document.getElementById("search");
+  const chipsEl = document.getElementById("chips");
+  const cuisineEl = document.getElementById("cuisine");
+  const sortEl = document.getElementById("sort");
+  const countEl = document.getElementById("count");
+  const gridEl = document.getElementById("grid");
+  const stateEl = document.getElementById("state");
+
+  function createCard(recipe) {
+    const link = el("a", "recipe-card");
+    link.href = "/recipes/" + recipe.id + "/";
+
+    const tile = el("div", "tile", recipe.category_icon || "🍽️");
+    tile.style.background = tileColor(recipe.category_id || recipe.id);
+
+    const body = el("div", "card-body");
+    if (recipe.category_name) body.appendChild(el("span", "badge", recipe.category_name));
+    body.appendChild(el("h3", "card-title", recipe.title));
+    body.appendChild(el("p", "card-desc", recipe.description));
+
+    const meta = el("div", "card-meta");
+    meta.appendChild(el("span", null, recipe.cooking_time + " мин"));
+    meta.appendChild(el("span", null, recipe.difficulty_label));
+    meta.appendChild(el("span", "rating", ratingText(recipe)));
+    body.appendChild(meta);
+
+    link.append(tile, body);
+    return link;
+  }
+
+  function visibleRecipes() {
+    const query = state.search.trim().toLowerCase();
+    const list = state.recipes.filter((recipe) => {
+      if (state.category !== "all" && String(recipe.category_id) !== state.category) return false;
+      if (state.cuisine !== "all" && String(recipe.cuisine_id) !== state.cuisine) return false;
+      if (!query) return true;
+      const haystack = [recipe.title, recipe.description, recipe.category_name, recipe.cuisine_name]
+        .join(" ")
+        .toLowerCase();
+      return haystack.includes(query);
+    });
+
+    if (state.sort === "rating") {
+      list.sort((a, b) => (b.rating_avg || 0) - (a.rating_avg || 0) || b.reviews_count - a.reviews_count);
+    } else if (state.sort === "time") {
+      list.sort((a, b) => a.cooking_time - b.cooking_time);
+    } else {
+      list.sort((a, b) => b.id - a.id);
+    }
+    return list;
+  }
+
+  function render() {
+    const list = visibleRecipes();
+    gridEl.replaceChildren(...list.map(createCard));
+    countEl.textContent = list.length + " рецепт табылды";
+    stateEl.textContent = list.length === 0 ? "Ештеңе табылмады. Басқа сөзбен іздеп көріңіз." : "";
+    stateEl.style.display = list.length === 0 ? "block" : "none";
+  }
+
+  function setActiveChip() {
+    chipsEl.querySelectorAll(".chip").forEach((chip) => {
+      chip.classList.toggle("active", chip.dataset.value === state.category);
+    });
+  }
+
+  function buildFilters() {
+    const categories = new Map();
+    const cuisines = new Map();
+    state.recipes.forEach((recipe) => {
+      if (recipe.category_id) {
+        categories.set(String(recipe.category_id), (recipe.category_icon || "") + " " + recipe.category_name);
+      }
+      if (recipe.cuisine_id) cuisines.set(String(recipe.cuisine_id), recipe.cuisine_name);
+    });
+
+    const makeChip = (value, label) => {
+      const chip = el("button", "chip", label);
+      chip.type = "button";
+      chip.dataset.value = value;
+      chip.addEventListener("click", () => {
+        state.category = value;
+        setActiveChip();
+        render();
+      });
+      return chip;
+    };
+
+    chipsEl.replaceChildren(
+      makeChip("all", "Барлығы"),
+      ...[...categories].sort((a, b) => a[1].localeCompare(b[1])).map(([id, label]) => makeChip(id, label))
+    );
+    setActiveChip();
+
+    const allOption = el("option", null, "Барлық асханалар");
+    allOption.value = "all";
+    cuisineEl.replaceChildren(
+      allOption,
+      ...[...cuisines].sort((a, b) => a[1].localeCompare(b[1])).map(([id, name]) => {
+        const option = el("option", null, name);
+        option.value = id;
+        return option;
+      })
+    );
+  }
+
+  searchEl.addEventListener("input", () => {
+    state.search = searchEl.value;
+    render();
+  });
+  cuisineEl.addEventListener("change", () => {
+    state.cuisine = cuisineEl.value;
+    render();
+  });
+  sortEl.addEventListener("change", () => {
+    state.sort = sortEl.value;
+    render();
+  });
+
+  getJSON(API)
+    .then((recipes) => {
+      state.recipes = recipes;
+      buildFilters();
+      render();
+    })
+    .catch((error) => {
+      stateEl.textContent = "Рецепттерді жүктеу мүмкін болмады: " + error.message;
+    });
+</script>
+{% endblock %}

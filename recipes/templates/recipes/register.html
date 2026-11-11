@@ -1,0 +1,33 @@
+{% extends "recipes/auth_base.html" %}
+
+{% block title %}Тіркелу — Recipebook{% endblock %}
+
+{% block auth_content %}
+<h1>Тіркелу 🍳</h1>
+<p class="sub">Жаңа аккаунт ашыңыз — бір минут қана</p>
+
+<form method="post" novalidate>
+  {% csrf_token %}
+
+  {% if form.non_field_errors %}
+    <div class="form-error">{{ form.non_field_errors.0 }}</div>
+  {% endif %}
+
+  {% for field in form %}
+    <div class="field">
+      <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+      {{ field }}
+      {% if field.errors %}
+        <ul class="errors">{% for e in field.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+      {% endif %}
+      {% if field.help_text %}
+        <div class="help">{{ field.help_text|safe }}</div>
+      {% endif %}
+    </div>
+  {% endfor %}
+
+  <button type="submit" class="submit">Тіркелу</button>
+</form>
+
+<p class="switch">Аккаунтыңыз бар ма? <a href="{% url 'login' %}">Кіру</a></p>
+{% endblock %}

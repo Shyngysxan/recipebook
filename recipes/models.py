@@ -4,31 +4,61 @@ from django.db import models
 
 
 class Category(models.Model):
-    name = models.CharField(max_length=100, unique=True)
+    name = models.CharField("Атауы", max_length=100, unique=True)
+    icon = models.CharField("Белгіше (эмодзи)", max_length=8, default="🍽️")
 
     class Meta:
-        verbose_name_plural = "categories"
+        verbose_name = "Санат"
+        verbose_name_plural = "Санаттар"
+        ordering = ["name"]
 
     def __str__(self):
         return self.name
 
 
-class Ingredient(models.Model):
-    name = models.CharField(max_length=100, unique=True)
+class Cuisine(models.Model):
+    name = models.CharField("Атауы", max_length=100, unique=True)
+
+    class Meta:
+        verbose_name = "Ұлттық асхана"
+        verbose_name_plural = "Ұлттық асханалар"
+        ordering = ["name"]
 
     def __str__(self):
         return self.name
 
 
 class Recipe(models.Model):
-    title = models.CharField(max_length=200)
-    description = models.TextField(blank=True)
-    instructions = models.TextField()
-    cooking_time = models.PositiveIntegerField(help_text="Минуттармен")
-    servings = models.PositiveSmallIntegerField(default=2)
-    created_at = models.DateTimeField(auto_now_add=True)
+    DIFFICULTY_CHOICES = [
+        ("easy", "Жеңіл"),
+        ("medium", "Орташа"),
+        ("hard", "Қиын"),
+    ]
+
+    title = models.CharField("Атауы", max_length=200)
+    description = models.TextField("Қысқаша сипаттама", blank=True)
+    ingredients = models.TextField(
+        "Ингредиенттер", help_text="Әр ингредиентті жаңа жолдан жазыңыз"
+    )
+    instructions = models.TextField(
+        "Дайындау жолы", help_text="Әр қадамды жаңа жолдан жазыңыз"
+    )
+    cooking_time = models.PositiveIntegerField("Дайындау уақыты (мин)")
+    servings = models.PositiveSmallIntegerField("Порция саны", default=2)
+    difficulty = models.CharField(
+        "Күрделілігі", max_length=10, choices=DIFFICULTY_CHOICES, default="medium"
+    )
     category = models.ForeignKey(
         Category,
+        verbose_name="Санат",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="recipes",
+    )
+    cuisine = models.ForeignKey(
+        Cuisine,
+        verbose_name="Ұлттық асхана",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
@@ -36,67 +66,39 @@ class Recipe(models.Model):
     )
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
+        verbose_name="Автор",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name="recipes",
     )
-    ingredients = models.ManyToManyField(
-        Ingredient,
-        through="RecipeIngredient",
-        related_name="recipes",
-    )
+    created_at = models.DateTimeField("Қосылған уақыты", auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Рецепт"
+        verbose_name_plural = "Рецепттер"
 
     def __str__(self):
         return self.title
 
 
-class RecipeIngredient(models.Model):
-    UNIT_CHOICES = [
-        ("g", "г"),
-        ("ml", "мл"),
-        ("pcs", "дана"),
-        ("tbsp", "ас қасық"),
-        ("tsp", "шай қасық"),
-    ]
-
-    recipe = models.ForeignKey(
-        Recipe, on_delete=models.CASCADE, related_name="recipe_ingredients"
-    )
-    ingredient = models.ForeignKey(Ingredient, on_delete=models.PROTECT)
-    quantity = models.DecimalField(max_digits=7, decimal_places=2)
-    unit = models.CharField(max_length=10, choices=UNIT_CHOICES, default="g")
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=["recipe", "ingredient"], name="unique_recipe_ingredient"
-            )
-        ]
-
-    def __str__(self):
-        return f"{self.recipe} — {self.ingredient}"
-
-
 class Review(models.Model):
     recipe = models.ForeignKey(
-        Recipe, on_delete=models.CASCADE, related_name="reviews"
-    )
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
+        Recipe,
+        verbose_name="Рецепт",
         on_delete=models.CASCADE,
         related_name="reviews",
     )
+    author_name = models.CharField("Аты", max_length=100)
     rating = models.PositiveSmallIntegerField(
-        validators=[MinValueValidator(1), MaxValueValidator(5)]
+        "Баға (1-5)", validators=[MinValueValidator(1), MaxValueValidator(5)]
     )
-    comment = models.TextField(blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    comment = models.TextField("Пікір", blank=True)
+    created_at = models.DateTimeField("Уақыты", auto_now_add=True)
 
     class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=["recipe", "user"], name="unique_review_per_user"
-            )
-        ]
+        verbose_name = "Пікір"
+        verbose_name_plural = "Пікірлер"
 
     def __str__(self):
-        return f"{self.recipe} — {self.rating}/5"
+        return f"{self.recipe} — {self.rating}/5 ({self.author_name})"

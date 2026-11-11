@@ -1,0 +1,31 @@
+{% extends "recipes/auth_base.html" %}
+
+{% block title %}Кіру — Recipebook{% endblock %}
+
+{% block auth_content %}
+<h1>Қош келдіңіз 👋</h1>
+<p class="sub">Аккаунтыңызға кіріңіз</p>
+
+<form method="post" novalidate>
+  {% csrf_token %}
+  <input type="hidden" name="next" value="{{ next }}">
+
+  {% if form.non_field_errors %}
+    <div class="form-error">{{ form.non_field_errors.0 }}</div>
+  {% endif %}
+
+  {% for field in form %}
+    <div class="field">
+      <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+      {{ field }}
+      {% if field.errors %}
+        <ul class="errors">{% for e in field.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+      {% endif %}
+    </div>
+  {% endfor %}
+
+  <button type="submit" class="submit">Кіру</button>
+</form>
+
+<p class="switch">Аккаунтыңыз жоқ па? <a href="{% url 'register' %}">Тіркелу</a></p>
+{% endblock %}

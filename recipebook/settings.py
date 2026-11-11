@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     'recipes',
 ]
 
+LANGUAGE_CODE = "kk"
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',

@@ -1,0 +1,65 @@
+{% extends "recipes/base.html" %}
+
+{% block style %}
+  .auth-wrap { display: flex; justify-content: center; padding: 48px 0 8px; }
+  .auth-card {
+    width: 100%;
+    max-width: 440px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 30px 28px;
+    box-shadow: var(--shadow);
+  }
+  .auth-card h1 { margin: 0 0 6px; font-size: 1.6rem; }
+  .auth-card .sub { margin: 0 0 22px; color: var(--muted); }
+  .field { margin-bottom: 16px; }
+  .field label { display: block; margin-bottom: 6px; font-weight: 600; font-size: .92rem; }
+  .field input {
+    display: block;
+    width: 100%;
+    padding: 11px 14px;
+    font: inherit;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: #fff;
+    color: var(--text);
+  }
+  .field input:focus { outline: 3px solid var(--soft); border-color: var(--primary); }
+  .field .help { margin: 6px 0 0; color: var(--muted); font-size: .8rem; }
+  .field .help ul { margin: 4px 0 0; padding-left: 18px; }
+  .errors { margin: 6px 0 0; padding: 0; list-style: none; color: #c92a2a; font-size: .85rem; font-weight: 600; }
+  .form-error {
+    margin-bottom: 16px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: #fff0f0;
+    border: 1px solid #ffc9c9;
+    color: #c92a2a;
+    font-size: .9rem;
+    font-weight: 600;
+  }
+  .submit {
+    width: 100%;
+    padding: 12px;
+    font: inherit;
+    font-weight: 700;
+    font-size: 1rem;
+    border: 0;
+    border-radius: 999px;
+    background: var(--primary);
+    color: #fff;
+    cursor: pointer;
+  }
+  .submit:hover { background: var(--primary-dark); }
+  .switch { margin: 18px 0 0; text-align: center; color: var(--muted); font-size: .92rem; }
+  .switch a { color: var(--primary); font-weight: 700; }
+{% endblock %}
+
+{% block content %}
+<main class="container auth-wrap">
+  <div class="auth-card">
+    {% block auth_content %}{% endblock %}
+  </div>
+</main>
+{% endblock %}

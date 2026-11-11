@@ -1,0 +1,156 @@
+{% extends "recipes/base.html" %}
+
+{% block style %}
+  .back { display: inline-block; margin: 22px 0 14px; color: var(--muted); font-weight: 600; }
+  .back:hover { color: var(--primary); }
+  .head {
+    display: flex;
+    gap: 24px;
+    align-items: center;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 22px;
+    box-shadow: var(--shadow);
+  }
+  .head .tile { width: 150px; height: 150px; flex-shrink: 0; border-radius: 16px; font-size: 4.5rem; }
+  .head h1 { margin: 8px 0 6px; font-size: 2rem; line-height: 1.2; }
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .lead { margin: 0 0 14px; color: var(--muted); }
+  .stats { display: flex; flex-wrap: wrap; gap: 10px 22px; font-weight: 600; }
+  .stats span small { display: block; color: var(--muted); font-weight: 500; font-size: .75rem; }
+  .columns { display: grid; grid-template-columns: 1fr 1.6fr; gap: 20px; margin-top: 22px; }
+  .panel {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px 22px;
+    box-shadow: var(--shadow);
+  }
+  .panel h2 { margin: 0 0 12px; font-size: 1.2rem; }
+  .ingredients { margin: 0; padding: 0; list-style: none; }
+  .ingredients li { padding: 8px 0; border-bottom: 1px dashed var(--border); }
+  .ingredients li:last-child { border-bottom: 0; }
+  .steps { margin: 0; padding: 0; list-style: none; counter-reset: step; }
+  .steps li { position: relative; padding: 0 0 16px 46px; counter-increment: step; }
+  .steps li::before {
+    content: counter(step);
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: #fff;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .reviews { margin-top: 22px; }
+  .review { padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .review:last-child { border-bottom: 0; }
+  .review-top { display: flex; justify-content: space-between; gap: 10px; font-weight: 700; }
+  .review-top .stars { color: var(--primary); }
+  .review-date { color: var(--muted); font-size: .8rem; }
+  .review p { margin: 4px 0 0; }
+  @media (max-width: 760px) {
+    .head { flex-direction: column; align-items: flex-start; }
+    .columns { grid-template-columns: 1fr; }
+  }
+{% endblock %}
+
+{% block content %}
+<main class="container">
+  <a class="back" href="/">← Барлық рецепттер</a>
+  <div id="app" data-recipe-id="{{ recipe_id }}">
+    <div class="state-box">Жүктелуде...</div>
+  </div>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const app = document.getElementById("app");
+  const recipeId = app.dataset.recipeId;
+
+  function lines(text) {
+    return (text || "").split("\n").map((line) => line.trim()).filter(Boolean);
+  }
+
+  function stat(label, value) {
+    const box = el("span", null, value);
+    box.appendChild(el("small", null, label));
+    return box;
+  }
+
+  function stars(rating) {
+    return "★".repeat(rating) + "☆".repeat(5 - rating);
+  }
+
+  function formatDate(iso) {
+    return new Date(iso).toLocaleDateString("kk-KZ");
+  }
+
+  function render(recipe) {
+    document.title = recipe.title + " — Recipebook";
+
+    const tile = el("div", "tile", recipe.category_icon || "🍽️");
+    tile.style.background = tileColor(recipe.category_id || recipe.id);
+
+    const tags = el("div", "tags");
+    if (recipe.category_name) tags.appendChild(el("span", "badge", recipe.category_name));
+    if (recipe.cuisine_name) tags.appendChild(el("span", "badge", recipe.cuisine_name));
+    tags.appendChild(el("span", "badge", recipe.difficulty_label));
+
+    const stats = el("div", "stats");
+    stats.append(
+      stat("дайындау уақыты", recipe.cooking_time + " мин"),
+      stat("порция", String(recipe.servings)),
+      stat("рейтинг", ratingText(recipe))
+    );
+
+    const info = el("div");
+    info.append(tags, el("h1", null, recipe.title), el("p", "lead", recipe.description), stats);
+    const head = el("section", "head");
+    head.append(tile, info);
+
+    const ingredientList = el("ul", "ingredients");
+    lines(recipe.ingredients).forEach((line) => ingredientList.appendChild(el("li", null, line)));
+    const ingredientsPanel = el("section", "panel");
+    ingredientsPanel.append(el("h2", null, "Ингредиенттер"), ingredientList);
+
+    const stepList = el("ol", "steps");
+    lines(recipe.instructions).forEach((line) => stepList.appendChild(el("li", null, line)));
+    const stepsPanel = el("section", "panel");
+    stepsPanel.append(el("h2", null, "Дайындау жолы"), stepList);
+
+    const columns = el("div", "columns");
+    columns.append(ingredientsPanel, stepsPanel);
+
+    const reviewsPanel = el("section", "panel reviews");
+    reviewsPanel.appendChild(el("h2", null, "Пікірлер (" + recipe.reviews.length + ")"));
+    if (recipe.reviews.length === 0) {
+      reviewsPanel.appendChild(el("p", "lead", "Бұл рецептке пікір әлі жоқ."));
+    }
+    recipe.reviews.forEach((review) => {
+      const top = el("div", "review-top");
+      top.append(el("span", null, review.author_name), el("span", "stars", stars(review.rating)));
+      const item = el("div", "review");
+      item.append(top, el("div", "review-date", formatDate(review.created_at)));
+      if (review.comment) item.appendChild(el("p", null, review.comment));
+      reviewsPanel.appendChild(item);
+    });
+
+    app.replaceChildren(head, columns, reviewsPanel);
+  }
+
+  getJSON(API + recipeId + "/")
+    .then(render)
+    .catch((error) => {
+      const message = error.status === 404 ? "Мұндай рецепт табылмады." : "Жүктеу қатесі: " + error.message;
+      app.replaceChildren(el("div", "state-box", message));
+    });
+</script>
+{% endblock %}
