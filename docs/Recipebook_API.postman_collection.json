@@ -1,0 +1,933 @@
+{
+  "info": {
+    "name": "Recipebook API (7-8 апта)",
+    "description": "Алдымен 'Сәтті' папкасын ретімен іске қос (Run folder): тізімдер өз id-лерін сақтайды, PUT/DELETE тек Postman жасаған жаңа рецептке қолданылады.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:8000"
+    },
+    {
+      "key": "existing_recipe_id",
+      "value": "3"
+    },
+    {
+      "key": "category_id",
+      "value": "1"
+    },
+    {
+      "key": "cuisine_id",
+      "value": "1"
+    },
+    {
+      "key": "recipe_id",
+      "value": ""
+    },
+    {
+      "key": "review_id",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "✅ Сәтті",
+      "item": [
+        {
+          "name": "1. GET рецепттер тізімі",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/drf/recipes/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "drf",
+                "recipes"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function(){ pm.response.to.have.status(200); });",
+                  "const j=pm.response.json(); if(j.length){ pm.collectionVariables.set(\"existing_recipe_id\", j[0].id); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2. GET санаттар тізімі",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/drf/categories/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "drf",
+                "categories"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function(){ pm.response.to.have.status(200); });",
+                  "const j=pm.response.json(); if(j.length){ pm.collectionVariables.set(\"category_id\", j[0].id); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "3. GET асханалар тізімі",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/drf/cuisines/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "drf",
+                "cuisines"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function(){ pm.response.to.have.status(200); });",
+                  "const j=pm.response.json(); if(j.length){ pm.collectionVariables.set(\"cuisine_id\", j[0].id); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "4. GET рецепт (пікірлермен)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/drf/recipes/{{existing_recipe_id}}/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "drf",
+                "recipes",
+                "{{existing_recipe_id}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function(){ pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "5. GET санат бойынша рецепттер",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/drf/categories/{{category_id}}/recipes/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "drf",
+                "categories",
+                "{{category_id}}",
+                "recipes"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function(){ pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "6. GET асхана бойынша рецепттер",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/drf/cuisines/{{cuisine_id}}/recipes/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "drf",
+                "cuisines",
+                "{{cuisine_id}}",
+                "recipes"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function(){ pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "7. GET рецепт бойынша пікірлер",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/drf/recipes/{{existing_recipe_id}}/reviews/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "drf",
+                "recipes",
+                "{{existing_recipe_id}}",
+                "reviews"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function(){ pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "8. POST рецепт жасау",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/drf/recipes/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "drf",
+                "recipes"
+              ]
+            },
+            "description": "Жаңа id recipe_id айнымалысына сақталады",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Тест рецепт (Postman)\",\n  \"description\": \"Postman тексеруі\",\n  \"ingredients\": \"1 кг күріш\\n1 кг сәбіз\\n2 шай қасық тұз\",\n  \"instructions\": \"Күрішті жуыңыз.\\nБәрін араластырып пісіріңіз.\",\n  \"cooking_time\": 60,\n  \"servings\": 4,\n  \"difficulty\": \"easy\",\n  \"category\": {{category_id}},\n  \"cuisine\": {{cuisine_id}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", function(){ pm.response.to.have.status(201); });",
+                  "pm.collectionVariables.set(\"recipe_id\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "9. PUT рецепт өзгерту (тек жаңа рецепт)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/drf/recipes/{{recipe_id}}/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "drf",
+                "recipes",
+                "{{recipe_id}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Өзгертілген тест рецепт\",\n  \"description\": \"Postman тексеруі\",\n  \"ingredients\": \"1 кг күріш\\n1 кг сәбіз\\n2 шай қасық тұз\",\n  \"instructions\": \"Күрішті жуыңыз.\\nБәрін араластырып пісіріңіз.\",\n  \"cooking_time\": 60,\n  \"servings\": 4,\n  \"difficulty\": \"easy\",\n  \"category\": {{category_id}},\n  \"cuisine\": {{cuisine_id}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function(){ pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "10. POST пікір жасау",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/drf/reviews/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "drf",
+                "reviews"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"recipe\": {{recipe_id}},\n  \"author_name\": \"Postman\",\n  \"rating\": 5,\n  \"comment\": \"Тест пікір\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", function(){ pm.response.to.have.status(201); });",
+                  "pm.collectionVariables.set(\"review_id\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "11. GET жаңа рецепттің пікірлері",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/drf/recipes/{{recipe_id}}/reviews/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "drf",
+                "recipes",
+                "{{recipe_id}}",
+                "reviews"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function(){ pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "12. DELETE пікірді өшіру",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/drf/reviews/{{review_id}}/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "drf",
+                "reviews",
+                "{{review_id}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 204\", function(){ pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "13. DELETE жаңа рецептті өшіру",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/drf/recipes/{{recipe_id}}/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "drf",
+                "recipes",
+                "{{recipe_id}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 204\", function(){ pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "❌ Қателер",
+      "item": [
+        {
+          "name": "E1. GET жоқ рецепт → 404",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/drf/recipes/99999/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "drf",
+                "recipes",
+                "99999"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", function(){ pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "E2. GET жоқ санаттың рецепттері → 404",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/drf/categories/99999/recipes/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "drf",
+                "categories",
+                "99999",
+                "recipes"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", function(){ pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "E3. GET жоқ асхананың рецепттері → 404",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/drf/cuisines/99999/recipes/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "drf",
+                "cuisines",
+                "99999",
+                "recipes"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", function(){ pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "E4. GET жоқ рецептің пікірлері → 404",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/drf/recipes/99999/reviews/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "drf",
+                "recipes",
+                "99999",
+                "reviews"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", function(){ pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "E5. POST бос дене → 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/drf/recipes/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "drf",
+                "recipes"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", function(){ pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "E6. POST жоқ category id → 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/drf/recipes/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "drf",
+                "recipes"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Тест рецепт (Postman)\",\n  \"description\": \"Postman тексеруі\",\n  \"ingredients\": \"1 кг күріш\\n1 кг сәбіз\\n2 шай қасық тұз\",\n  \"instructions\": \"Күрішті жуыңыз.\\nБәрін араластырып пісіріңіз.\",\n  \"cooking_time\": 60,\n  \"servings\": 4,\n  \"difficulty\": \"easy\",\n  \"category\": 99999,\n  \"cuisine\": {{cuisine_id}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", function(){ pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "E7. POST қысқа атау → 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/drf/recipes/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "drf",
+                "recipes"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"A\",\n  \"description\": \"Postman тексеруі\",\n  \"ingredients\": \"1 кг күріш\\n1 кг сәбіз\\n2 шай қасық тұз\",\n  \"instructions\": \"Күрішті жуыңыз.\\nБәрін араластырып пісіріңіз.\",\n  \"cooking_time\": 60,\n  \"servings\": 4,\n  \"difficulty\": \"easy\",\n  \"category\": {{category_id}},\n  \"cuisine\": {{cuisine_id}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", function(){ pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "E8. POST пікір, жоқ рецепт → 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/drf/reviews/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "drf",
+                "reviews"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"recipe\": 99999,\n  \"author_name\": \"X\",\n  \"rating\": 4\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", function(){ pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "E9. POST пікір, баға 9 → 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/drf/reviews/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "drf",
+                "reviews"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"recipe\": {{existing_recipe_id}},\n  \"author_name\": \"X\",\n  \"rating\": 9\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", function(){ pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "E10. POST пікір, баға 0 → 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/drf/reviews/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "drf",
+                "reviews"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"recipe\": {{existing_recipe_id}},\n  \"author_name\": \"X\",\n  \"rating\": 0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", function(){ pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

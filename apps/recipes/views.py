@@ -7,8 +7,8 @@ from django.shortcuts import redirect, render
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_GET, require_http_methods
 
-from .forms import RegisterForm
-from .models import Category, Cuisine, Recipe
+from apps.recipes.forms import RegisterForm
+from apps.recipes.models import Category, Cuisine, Recipe
 
 
 # ---------- Сайттың беттері (қолданушы көреді) ----------

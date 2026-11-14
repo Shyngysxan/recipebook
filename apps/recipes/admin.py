@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Category, Cuisine, Recipe, Review
+from apps.recipes.models import Category, Cuisine, Recipe, Review
 
 
 class ReviewInline(admin.TabularInline):

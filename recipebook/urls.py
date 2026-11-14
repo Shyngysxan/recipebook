@@ -1,9 +1,9 @@
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
-from django.urls import path
+from django.urls import path, include
 
-from recipes import views
-from recipes.forms import LoginForm
+from apps.recipes import views
+from apps.recipes.forms import LoginForm
 
 urlpatterns = [
     path("", views.home, name="home"),
@@ -26,4 +26,5 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/recipes/", views.recipe_list),
     path("api/recipes/<int:pk>/", views.recipe_detail),
+    path("api/drf/", include("apps.recipes.api_urls")),
 ]
