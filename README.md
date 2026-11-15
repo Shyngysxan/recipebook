@@ -12,11 +12,12 @@
 - регистрация, вход и выход пользователей;
 - админ-панель Django;
 - REST API на Django REST Framework (сериализаторы, CRUD для рецептов, категорий, кухонь и отзывов,
-  выборки по связанным сущностям, проверка данных и корректные коды ошибок).
+  выборки по связанным сущностям, проверка данных и корректные коды ошибок);
+- фильтрация, текстовый поиск, сортировка и пагинация списка рецептов в API (по 5 записей на страницу).
 
 ## Технологии
 
-Python 3.12, Django 5.x, Django REST Framework, SQLite, HTML/CSS/JS (шаблоны Django), Postman.
+Python 3.12, Django, Django REST Framework, django-filter, SQLite, HTML/CSS/JS (шаблоны Django), Postman.
 
 ## Структура проекта
 
@@ -29,10 +30,13 @@ recipebook/
 │       ├── fixtures/      # тестовые данные
 │       ├── templates/
 │       ├── management/commands/seed_reviews.py
+│       ├── management/commands/seed_demo_recipes.py
 │       ├── admin.py  apps.py  forms.py  models.py  views.py  tests.py
 │       ├── serializers.py     # сериализаторы DRF (недели 7–8)
 │       ├── api_views.py       # представления DRF (недели 7–8)
-│       └── api_urls.py        # маршруты API (недели 7–8)
+│       ├── api_urls.py        # маршруты API (недели 7–8)
+│       ├── filters.py         # фильтр, поиск, сортировка (неделя 9)
+│       └── pagination.py      # пагинация (неделя 9)
 ├── docs/
 │   ├── ER_diagram.md
 │   └── Recipebook_API.postman_collection.json
@@ -54,11 +58,11 @@ python -m venv .venv
 # source .venv/bin/activate       # macOS / Linux
 
 # 3. зависимости
-pip install -r requirements.txt
+pip install -r requirements.txt     # включает django-filter
 
 # 4. база данных
 python manage.py migrate
-python manage.py loaddata <[sample_data.json](apps/recipes/fixtures/sample_data.json)_apps/recipes/fixtures>   # тестовые данные
+python manage.py loaddata <ИМЯ_ФАЙЛА_ИЗ_apps/recipes/fixtures>   # тестовые данные
 python manage.py createsuperuser                                  # для входа в /admin/
 
 # 5. проверка и запуск
@@ -69,8 +73,10 @@ python manage.py runserver
 Сайт: http://127.0.0.1:8000/ · Админка: http://127.0.0.1:8000/admin/ ·
 API (Browsable API): http://127.0.0.1:8000/api/drf/recipes/
 
-Необязательно: `python manage.py seed_reviews` добавляет демо-отзывы к имеющимся рецептам
-(`python manage.py seed_reviews --clear` удаляет только их).
+Необязательно:
+- `python manage.py seed_demo_recipes` добавляет 14 демо-рецептов, чтобы в базе было не менее 20 записей
+  (`--clear` удаляет только их);
+- `python manage.py seed_reviews` добавляет демо-отзывы к имеющимся рецептам (`--clear` удаляет только их).
 
 ## Модели и связи
 
@@ -95,7 +101,7 @@ erDiagram
 
 | Метод | URL | Назначение |
 |---|---|---|
-| GET, POST | `/api/drf/recipes/` | список рецептов / создание |
+| GET, POST | `/api/drf/recipes/` | список рецептов (с фильтрами, поиском, сортировкой и пагинацией) / создание |
 | GET, PUT, PATCH, DELETE | `/api/drf/recipes/<id>/` | один рецепт (GET — вместе с отзывами) |
 | GET | `/api/drf/recipes/<id>/reviews/` | отзывы рецепта |
 | GET, POST | `/api/drf/categories/` | список категорий / создание |
@@ -145,10 +151,87 @@ Content-Type: application/json
 
 При удалении категории или кухни рецепты сохраняются (`SET_NULL`); при удалении рецепта удаляются его отзывы (`CASCADE`).
 
+## Фильтрация, поиск, сортировка и пагинация (неделя 9)
+
+Все параметры применяются к списку рецептов `GET /api/drf/recipes/` и сочетаются друг с другом.
+В списке по 5 записей на страницу.
+
+| Параметр | Что делает | Допустимые значения | Пример |
+|---|---|---|---|
+| `category` | фильтр по категории | id категории | `?category=2` |
+| `cuisine` | фильтр по национальной кухне | id кухни | `?cuisine=3` |
+| `difficulty` | фильтр по сложности | `easy`, `medium`, `hard` | `?difficulty=easy` |
+| `min_time` | время приготовления не меньше, мин | целое число | `?min_time=30` |
+| `max_time` | время приготовления не больше, мин | целое число | `?max_time=60` |
+| `search` | текстовый поиск | любой текст; несколько слов – все должны встретиться | `?search=плов` |
+| `ordering` | сортировка | `created_at`, `cooking_time`, `title`, `servings`; `-` перед именем – по убыванию; несколько полей через запятую | `?ordering=-created_at` |
+| `page` | номер страницы | 1, 2, 3, … | `?page=2` |
+
+Поиск идёт по полям: `title`, `description`, `ingredients`, название категории и название кухни.
+По умолчанию список отсортирован от новых рецептов к старым (`-created_at`).
+
+Примеры (параметры можно комбинировать):
+
+```
+GET /api/drf/recipes/?difficulty=easy
+GET /api/drf/recipes/?category=2&difficulty=hard
+GET /api/drf/recipes/?max_time=30&ordering=cooking_time
+GET /api/drf/recipes/?search=күріш&ordering=-created_at
+GET /api/drf/recipes/?difficulty=easy&cuisine=3&search=а&ordering=cooking_time&page=1
+GET /api/drf/recipes/?page=2
+```
+
+Формат ответа (пагинация):
+
+```json
+{
+  "count": 23,
+  "next": "http://127.0.0.1:8000/api/drf/recipes/?page=2",
+  "previous": null,
+  "results": [ { "id": 14, "title": "...", "...": "..." } ]
+}
+```
+`count` – сколько записей найдено всего (с учётом фильтров), `results` – не более 5 записей текущей страницы,
+`next` и `previous` – ссылки на соседние страницы. Параметры фильтра сохраняются в ссылках.
+
+Ошибки параметров:
+
+| Ситуация | Код | Ответ |
+|---|---|---|
+| несуществующая страница (`?page=999`) | 404 | `{"detail": "Invalid page."}` |
+| недопустимое значение фильтра (`?difficulty=super`, `?category=abc`) | 400 | сообщение об ошибке для поля |
+| неизвестное поле в `ordering` | 200 | параметр игнорируется, действует порядок по умолчанию |
+| ничего не найдено | 200 | `{"count": 0, "results": []}` |
+
+Особенности реализации:
+- Фильтры (`category`, `cuisine`, `difficulty`, `min_time`, `max_time`) – `django-filter`, класс `RecipeFilter`.
+- В SQLite поиск по кириллице чувствителен к регистру («плов» не находит «Плов»), поэтому написан
+  `MultiCaseSearchFilter`: он проверяет несколько вариантов написания слова (как введено, строчными, прописными,
+  с заглавной первой буквой).
+- К сортировке добавляется `id` (`StableOrderingFilter`), чтобы при одинаковых значениях записи не перемешивались
+  между страницами.
+- Пагинация подключена только к списку рецептов; списки категорий, кухонь и отзывов остались без пагинации.
+
+### Настройки (`settings.py`)
+
+```python
+INSTALLED_APPS = [
+    # ...
+    "rest_framework",
+    "django_filters",
+    "apps.recipes",
+]
+
+REST_FRAMEWORK = {
+    "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
+}
+```
+
 ## Проверка работы
 
 1. `python manage.py check` — без ошибок.
-2. Postman: Import → `docs/Recipebook_API.postman_collection.json`, запустить папку «Сәтті», затем «Қателер».
+2. Postman: Import → `docs/Recipebook_API.postman_collection.json`, запустить всю коллекцию
+   (папки «Сәтті», «Қателер», «9-апта»: сүзгі, іздеу, сұрыптау, пагинация).
    PUT и DELETE применяются только к рецепту, созданному самой коллекцией, поэтому реальные данные не затрагиваются.
 3. Или открыть страницы API в браузере (DRF Browsable API) и проверить формы создания.
 
@@ -160,6 +243,7 @@ Content-Type: application/json
 | 6 | REST API и CRUD на обычных представлениях Django (JsonResponse) |
 | 7 | Установка DRF, `ModelSerializer`, generic views, валидация, проверка в Browsable API и Postman |
 | 8 | Связанные модели в API: сериализаторы Category, Cuisine, Review, CRUD, выборки по связанным сущностям, вложенный вывод, коллекция Postman, ER-диаграмма |
+| 9 | django-filter, фильтрация по category/cuisine/difficulty/времени, текстовый поиск, сортировка, пагинация по 5, не менее 20 записей, документация параметров |
 
 ## Принятые решения и найденные ошибки
 
@@ -171,3 +255,7 @@ Content-Type: application/json
 - **Запись — по id, чтение — вложенно.** Клиент передаёт `"category": 2`, а в ответе получает ещё и `category_detail`.
 - **Предупреждение `urls.W005` (namespace не уникален).** Возникло из-за двойного `include` одного и того же `api_urls`; оставлено одно подключение.
 - **`JSON parse error` в Postman.** Причиной была лишняя запятая и фигурная скобка после скопированного JSON; исправлено вручную.
+- **Пагинация меняет формат ответа.** Список рецептов теперь возвращает объект `{count, next, previous, results}`
+  вместо массива; тесты Postman-коллекции обновлены под этот формат.
+- **Регистр в поиске на SQLite.** Стандартный `icontains` не различает регистр только для латиницы, поэтому для кириллицы
+  добавлен собственный фильтр поиска (см. выше).

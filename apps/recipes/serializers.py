@@ -1,7 +1,3 @@
-"""
-7–8 апта: DRF сериализаторлары.
-Модельдер: Category, Cuisine, Recipe, Review (Recipe -> Category / Cuisine / User, Review -> Recipe).
-"""
 from django.db.models import Avg
 from rest_framework import serializers
 

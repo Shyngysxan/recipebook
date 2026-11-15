@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "Recipebook API (7-8 апта)",
-    "description": "Алдымен 'Сәтті' папкасын ретімен іске қос (Run folder): тізімдер өз id-лерін сақтайды, PUT/DELETE тек Postman жасаған жаңа рецептке қолданылады.",
+    "name": "Recipebook API (7-9 апта)",
+    "description": "'✅ Сәтті' → '❌ Қателер' → '🔎 9-апта' папкаларын ретімен іске қос (Run collection). Рецепттер тізімі 9-аптадан бастап беттелген: {count, next, previous, results}.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -35,7 +35,7 @@
       "name": "✅ Сәтті",
       "item": [
         {
-          "name": "1. GET рецепттер тізімі",
+          "name": "1. GET рецепттер тізімі (беттелген)",
           "request": {
             "method": "GET",
             "header": [
@@ -52,7 +52,8 @@
               "path": [
                 "api",
                 "drf",
-                "recipes"
+                "recipes",
+                ""
               ]
             }
           },
@@ -63,7 +64,9 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"Status 200\", function(){ pm.response.to.have.status(200); });",
-                  "const j=pm.response.json(); if(j.length){ pm.collectionVariables.set(\"existing_recipe_id\", j[0].id); }"
+                  "const j = pm.response.json();",
+                  "const arr = Array.isArray(j) ? j : j.results;",
+                  "if (arr && arr.length) { pm.collectionVariables.set(\"existing_recipe_id\", arr[0].id); }"
                 ]
               }
             }
@@ -87,7 +90,8 @@
               "path": [
                 "api",
                 "drf",
-                "categories"
+                "categories",
+                ""
               ]
             }
           },
@@ -122,7 +126,8 @@
               "path": [
                 "api",
                 "drf",
-                "cuisines"
+                "cuisines",
+                ""
               ]
             }
           },
@@ -158,7 +163,8 @@
                 "api",
                 "drf",
                 "recipes",
-                "{{existing_recipe_id}}"
+                "{{existing_recipe_id}}",
+                ""
               ]
             }
           },
@@ -194,7 +200,8 @@
                 "drf",
                 "categories",
                 "{{category_id}}",
-                "recipes"
+                "recipes",
+                ""
               ]
             }
           },
@@ -230,7 +237,8 @@
                 "drf",
                 "cuisines",
                 "{{cuisine_id}}",
-                "recipes"
+                "recipes",
+                ""
               ]
             }
           },
@@ -266,7 +274,8 @@
                 "drf",
                 "recipes",
                 "{{existing_recipe_id}}",
-                "reviews"
+                "reviews",
+                ""
               ]
             }
           },
@@ -300,7 +309,8 @@
               "path": [
                 "api",
                 "drf",
-                "recipes"
+                "recipes",
+                ""
               ]
             },
             "description": "Жаңа id recipe_id айнымалысына сақталады",
@@ -346,7 +356,8 @@
                 "api",
                 "drf",
                 "recipes",
-                "{{recipe_id}}"
+                "{{recipe_id}}",
+                ""
               ]
             },
             "body": {
@@ -389,7 +400,8 @@
               "path": [
                 "api",
                 "drf",
-                "reviews"
+                "reviews",
+                ""
               ]
             },
             "body": {
@@ -435,7 +447,8 @@
                 "drf",
                 "recipes",
                 "{{recipe_id}}",
-                "reviews"
+                "reviews",
+                ""
               ]
             }
           },
@@ -470,7 +483,8 @@
                 "api",
                 "drf",
                 "reviews",
-                "{{review_id}}"
+                "{{review_id}}",
+                ""
               ]
             }
           },
@@ -505,7 +519,8 @@
                 "api",
                 "drf",
                 "recipes",
-                "{{recipe_id}}"
+                "{{recipe_id}}",
+                ""
               ]
             }
           },
@@ -545,7 +560,8 @@
                 "api",
                 "drf",
                 "recipes",
-                "99999"
+                "99999",
+                ""
               ]
             }
           },
@@ -581,7 +597,8 @@
                 "drf",
                 "categories",
                 "99999",
-                "recipes"
+                "recipes",
+                ""
               ]
             }
           },
@@ -617,7 +634,8 @@
                 "drf",
                 "cuisines",
                 "99999",
-                "recipes"
+                "recipes",
+                ""
               ]
             }
           },
@@ -653,7 +671,8 @@
                 "drf",
                 "recipes",
                 "99999",
-                "reviews"
+                "reviews",
+                ""
               ]
             }
           },
@@ -687,7 +706,8 @@
               "path": [
                 "api",
                 "drf",
-                "recipes"
+                "recipes",
+                ""
               ]
             },
             "body": {
@@ -730,7 +750,8 @@
               "path": [
                 "api",
                 "drf",
-                "recipes"
+                "recipes",
+                ""
               ]
             },
             "body": {
@@ -773,7 +794,8 @@
               "path": [
                 "api",
                 "drf",
-                "recipes"
+                "recipes",
+                ""
               ]
             },
             "body": {
@@ -816,7 +838,8 @@
               "path": [
                 "api",
                 "drf",
-                "reviews"
+                "reviews",
+                ""
               ]
             },
             "body": {
@@ -859,7 +882,8 @@
               "path": [
                 "api",
                 "drf",
-                "reviews"
+                "reviews",
+                ""
               ]
             },
             "body": {
@@ -902,7 +926,8 @@
               "path": [
                 "api",
                 "drf",
-                "reviews"
+                "reviews",
+                ""
               ]
             },
             "body": {
@@ -922,6 +947,619 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"Status 400\", function(){ pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "🔎 9-апта: сүзгі, іздеу, сұрыптау, пагинация",
+      "item": [
+        {
+          "name": "P1. Беттеу: бірінші бет (5 жазба)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/drf/recipes/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "drf",
+                "recipes",
+                ""
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function(){ pm.response.to.have.status(200); });",
+                  "pm.test(\"Пагинация: count/results, ≤ 5 жазба\", function(){ const j=pm.response.json(); pm.expect(j).to.have.property(\"count\"); pm.expect(j.results.length).to.be.at.most(5); });",
+                  "pm.test(\"Базада кемінде 20 рецепт\", function(){ pm.expect(pm.response.json().count).to.be.at.least(20); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "P2. Беттеу: екінші бет",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/drf/recipes/?page=2",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "drf",
+                "recipes",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "2"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function(){ pm.response.to.have.status(200); });",
+                  "pm.test(\"Пагинация: count/results, ≤ 5 жазба\", function(){ const j=pm.response.json(); pm.expect(j).to.have.property(\"count\"); pm.expect(j.results.length).to.be.at.most(5); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "P3. Сүзгі: difficulty=easy",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/drf/recipes/?difficulty=easy",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "drf",
+                "recipes",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "difficulty",
+                  "value": "easy"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function(){ pm.response.to.have.status(200); });",
+                  "pm.test(\"Пагинация: count/results, ≤ 5 жазба\", function(){ const j=pm.response.json(); pm.expect(j).to.have.property(\"count\"); pm.expect(j.results.length).to.be.at.most(5); });",
+                  "pm.test(\"Нәтиже бос емес\", function(){ pm.expect(pm.response.json().results.length).to.be.above(0); });",
+                  "pm.test(\"Барлық нәтижеде difficulty = easy\", function(){ pm.response.json().results.forEach(function(x){ pm.expect(x.difficulty).to.eql(\"easy\"); }); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "P4. Сүзгі: category=2",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/drf/recipes/?category=2",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "drf",
+                "recipes",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "category",
+                  "value": "2"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function(){ pm.response.to.have.status(200); });",
+                  "pm.test(\"Пагинация: count/results, ≤ 5 жазба\", function(){ const j=pm.response.json(); pm.expect(j).to.have.property(\"count\"); pm.expect(j.results.length).to.be.at.most(5); });",
+                  "pm.test(\"Нәтиже бос емес\", function(){ pm.expect(pm.response.json().results.length).to.be.above(0); });",
+                  "pm.test(\"Барлық нәтижеде category = 2\", function(){ pm.response.json().results.forEach(function(x){ pm.expect(x.category).to.eql(2); }); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "P5. Сүзгі: cuisine=3",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/drf/recipes/?cuisine=3",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "drf",
+                "recipes",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "cuisine",
+                  "value": "3"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function(){ pm.response.to.have.status(200); });",
+                  "pm.test(\"Пагинация: count/results, ≤ 5 жазба\", function(){ const j=pm.response.json(); pm.expect(j).to.have.property(\"count\"); pm.expect(j.results.length).to.be.at.most(5); });",
+                  "pm.test(\"Нәтиже бос емес\", function(){ pm.expect(pm.response.json().results.length).to.be.above(0); });",
+                  "pm.test(\"Барлық нәтижеде cuisine = 3\", function(){ pm.response.json().results.forEach(function(x){ pm.expect(x.cuisine).to.eql(3); }); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "P6. Сүзгі: max_time=30",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/drf/recipes/?max_time=30",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "drf",
+                "recipes",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "max_time",
+                  "value": "30"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function(){ pm.response.to.have.status(200); });",
+                  "pm.test(\"Пагинация: count/results, ≤ 5 жазба\", function(){ const j=pm.response.json(); pm.expect(j).to.have.property(\"count\"); pm.expect(j.results.length).to.be.at.most(5); });",
+                  "pm.test(\"Нәтиже бос емес\", function(){ pm.expect(pm.response.json().results.length).to.be.above(0); });",
+                  "pm.test(\"Барлығы ≤ 30 мин\", function(){ pm.response.json().results.forEach(function(x){ pm.expect(x.cooking_time).to.be.at.most(30); }); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "P7. Іздеу: search=Плов",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/drf/recipes/?search=Плов",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "drf",
+                "recipes",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "Плов"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function(){ pm.response.to.have.status(200); });",
+                  "pm.test(\"Нәтиже бос емес\", function(){ pm.expect(pm.response.json().results.length).to.be.above(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "P8. Іздеу: search=плов (кіші әріппен)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/drf/recipes/?search=плов",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "drf",
+                "recipes",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "плов"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function(){ pm.response.to.have.status(200); });",
+                  "pm.test(\"Нәтиже бос емес\", function(){ pm.expect(pm.response.json().results.length).to.be.above(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "P9. Іздеу: search=күріш (ингредиент бойынша)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/drf/recipes/?search=күріш",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "drf",
+                "recipes",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "күріш"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function(){ pm.response.to.have.status(200); });",
+                  "pm.test(\"Нәтиже бос емес\", function(){ pm.expect(pm.response.json().results.length).to.be.above(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "P10. Сұрыптау: ordering=-created_at",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/drf/recipes/?ordering=-created_at",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "drf",
+                "recipes",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "ordering",
+                  "value": "-created_at"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function(){ pm.response.to.have.status(200); });",
+                  "pm.test(\"Пагинация: count/results, ≤ 5 жазба\", function(){ const j=pm.response.json(); pm.expect(j).to.have.property(\"count\"); pm.expect(j.results.length).to.be.at.most(5); });",
+                  "pm.test(\"created_at кему ретімен\", function(){ const r=pm.response.json().results.map(x=>x.created_at); for(let i=1;i<r.length;i++){ pm.expect(r[i] <= r[i-1]).to.be.true; } });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "P11. Сұрыптау: ordering=cooking_time",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/drf/recipes/?ordering=cooking_time",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "drf",
+                "recipes",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "ordering",
+                  "value": "cooking_time"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function(){ pm.response.to.have.status(200); });",
+                  "pm.test(\"Пагинация: count/results, ≤ 5 жазба\", function(){ const j=pm.response.json(); pm.expect(j).to.have.property(\"count\"); pm.expect(j.results.length).to.be.at.most(5); });",
+                  "pm.test(\"cooking_time өсу ретімен\", function(){ const r=pm.response.json().results.map(x=>x.cooking_time); for(let i=1;i<r.length;i++){ pm.expect(r[i]).to.be.at.least(r[i-1]); } });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "P12. Қосу: сүзгі + іздеу + сұрыптау + бет",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/drf/recipes/?difficulty=easy&search=а&ordering=cooking_time&page=1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "drf",
+                "recipes",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "difficulty",
+                  "value": "easy"
+                },
+                {
+                  "key": "search",
+                  "value": "а"
+                },
+                {
+                  "key": "ordering",
+                  "value": "cooking_time"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function(){ pm.response.to.have.status(200); });",
+                  "pm.test(\"Пагинация: count/results, ≤ 5 жазба\", function(){ const j=pm.response.json(); pm.expect(j).to.have.property(\"count\"); pm.expect(j.results.length).to.be.at.most(5); });",
+                  "pm.test(\"Барлық нәтижеде difficulty = easy\", function(){ pm.response.json().results.forEach(function(x){ pm.expect(x.difficulty).to.eql(\"easy\"); }); });",
+                  "pm.test(\"cooking_time өсу ретімен\", function(){ const r=pm.response.json().results.map(x=>x.cooking_time); for(let i=1;i<r.length;i++){ pm.expect(r[i]).to.be.at.least(r[i-1]); } });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PE1. Қате: жоқ бет (page=999) → 404",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/drf/recipes/?page=999",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "drf",
+                "recipes",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "999"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", function(){ pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PE2. Қате: difficulty=super → 400",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/drf/recipes/?difficulty=super",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "drf",
+                "recipes",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "difficulty",
+                  "value": "super"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", function(){ pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PE3. Қате: category=abc → 400",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/drf/recipes/?category=abc",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "drf",
+                "recipes",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "category",
+                  "value": "abc"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", function(){ pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PE4. Нәтиже жоқ: search=жоқсөз → 200, count=0",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/drf/recipes/?search=жоқсөзжоқ",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "drf",
+                "recipes",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "жоқсөзжоқ"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function(){ pm.response.to.have.status(200); });",
+                  "pm.test(\"count = 0\", function(){ pm.expect(pm.response.json().count).to.eql(0); });"
                 ]
               }
             }
