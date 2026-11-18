@@ -26,5 +26,6 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/recipes/", views.recipe_list),
     path("api/recipes/<int:pk>/", views.recipe_detail),
+    path("api/drf/auth/", include("apps.accounts.urls")),
     path("api/drf/", include("apps.recipes.api_urls")),
 ]

@@ -13,7 +13,8 @@
 - админ-панель Django;
 - REST API на Django REST Framework (сериализаторы, CRUD для рецептов, категорий, кухонь и отзывов,
   выборки по связанным сущностям, проверка данных и корректные коды ошибок);
-- фильтрация, текстовый поиск, сортировка и пагинация списка рецептов в API (по 5 записей на страницу).
+- фильтрация, текстовый поиск, сортировка и пагинация списка рецептов в API (по 5 записей на страницу);
+- регистрация пользователей через API (безопасное хранение паролей) и профиль текущего пользователя.
 
 ## Технологии
 
@@ -25,6 +26,8 @@ Python 3.12, Django, Django REST Framework, django-filter, SQLite, HTML/CSS/JS (
 recipebook/
 ├── recipebook/            # настройки проекта (settings.py, urls.py, wsgi.py, asgi.py)
 ├── apps/
+│   ├── accounts/          # регистрация и профиль (неделя 10)
+│   │   └── serializers.py  views.py  urls.py  tests.py
 │   └── recipes/           # приложение (можно перенести в другой проект целиком)
 │       ├── migrations/
 │       ├── fixtures/      # тестовые данные
@@ -227,9 +230,70 @@ REST_FRAMEWORK = {
 }
 ```
 
+## Регистрация и профиль (неделя 10)
+
+Используется стандартная модель `User` Django (`django.contrib.auth`), миграции не требуются.
+
+| Метод | URL | Назначение | Коды |
+|---|---|---|---|
+| POST | `/api/drf/auth/register/` | регистрация (`username`, `email`, `password`) | 201, 400 |
+| GET | `/api/drf/auth/me/` | профиль текущего пользователя (нужна аутентификация) | 200, 401 |
+
+Пример регистрации:
+
+```http
+POST /api/drf/auth/register/
+Content-Type: application/json
+
+{"username": "student1", "email": "student1@example.com", "password": "Strong#Pass2026"}
+```
+Ответ `201 Created`: `{"id": 5, "username": "student1", "email": "student1@example.com"}` – пароль в ответе не возвращается.
+
+Безопасность и проверки:
+- Пароль сохраняется только в виде хеша (`create_user`, алгоритм PBKDF2), открытым текстом он нигде не хранится.
+- Уникальность `username` проверяется без учёта регистра (`Student` и `student` – один и тот же логин), уникальность `email` – также.
+- Проверяются корректность email, минимальная длина пароля (8 символов) и правила `AUTH_PASSWORD_VALIDATORS` (слишком простые и числовые пароли отклоняются).
+- Профиль доступен только аутентифицированному пользователю; на этой неделе используется HTTP Basic (в Postman: вкладка Authorization → Basic Auth).
+  Без данных или с неверным паролем – `401 Unauthorized`.
+
+Ошибки:
+
+| Ситуация | Код | Ответ |
+|---|---|---|
+| повторный `username` | 400 | `{"username": ["Бұл username бос емес."]}` |
+| некорректный email | 400 | `{"email": ["Enter a valid email address."]}` |
+| короткий или простой пароль | 400 | сообщение для поля `password` |
+| нет обязательных полей | 400 | `This field is required.` для каждого поля |
+| профиль без аутентификации или с неверным паролем | 401 | `{"detail": "Authentication credentials were not provided."}` |
+
+### Настройки (`settings.py`)
+
+```python
+INSTALLED_APPS = [
+    # ...
+    "rest_framework",
+    "django_filters",
+    "apps.accounts",
+    "apps.recipes",
+]
+
+REST_FRAMEWORK = {
+    "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
+    "DEFAULT_AUTHENTICATION_CLASSES": ["rest_framework.authentication.BasicAuthentication"],
+}
+```
+
+В `urls.py` проекта (до `api/drf/`):
+
+```python
+path("api/drf/auth/", include("apps.accounts.urls")),
+```
+
+Операции записи рецептов, категорий и отзывов на этой неделе остаются открытыми (защита и права доступа – задания следующих недель).
+
 ## Проверка работы
 
-1. `python manage.py check` — без ошибок.
+1. `python manage.py check` — без ошибок; `python manage.py test apps.accounts` — тесты регистрации и профиля.
 2. Postman: Import → `docs/Recipebook_API.postman_collection.json`, запустить всю коллекцию
    (папки «Сәтті», «Қателер», «9-апта»: сүзгі, іздеу, сұрыптау, пагинация).
    PUT и DELETE применяются только к рецепту, созданному самой коллекцией, поэтому реальные данные не затрагиваются.
@@ -244,6 +308,7 @@ REST_FRAMEWORK = {
 | 7 | Установка DRF, `ModelSerializer`, generic views, валидация, проверка в Browsable API и Postman |
 | 8 | Связанные модели в API: сериализаторы Category, Cuisine, Review, CRUD, выборки по связанным сущностям, вложенный вывод, коллекция Postman, ER-диаграмма |
 | 9 | django-filter, фильтрация по category/cuisine/difficulty/времени, текстовый поиск, сортировка, пагинация по 5, не менее 20 записей, документация параметров |
+| 10 | Регистрация через API (`create_user`, хеширование), проверки username/email/пароля, профиль `/auth/me/` с аутентификацией (Basic), коллекция Postman и автотесты |
 
 ## Принятые решения и найденные ошибки
 
@@ -259,3 +324,6 @@ REST_FRAMEWORK = {
   вместо массива; тесты Postman-коллекции обновлены под этот формат.
 - **Регистр в поиске на SQLite.** Стандартный `icontains` не различает регистр только для латиницы, поэтому для кириллицы
   добавлен собственный фильтр поиска (см. выше).
+- **Регистрация в `apps/accounts`.** Код пользователей вынесен в отдельное приложение; маршруты `/api/drf/auth/...` не
+  пересекаются со страницами сайта (`/login/`, `/register/`) и ручными маршрутами `/api/recipes/`.
+- **Аутентификация профиля.** Пока токены не введены, профиль защищён HTTP Basic; на следующей неделе его заменит JWT.
